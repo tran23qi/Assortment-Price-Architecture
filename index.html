@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assortment and price architecture across three markets</title>
+<meta name="description" content="A commercial case study reading H&amp;M womenswear knitwear assortment across Sweden, Germany and the United States from public data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FBFAF8;
+  --ink:#16171A;
+  --muted:#6E7076;
+  --rule:#D9D6D0;
+  --fill:#E4E1DA;
+  --signal:#C8102E;
+  --measure:64ch;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Archivo',ui-sans-serif,-apple-system,'Segoe UI','Helvetica Neue',Arial,sans-serif;
+  font-size:17px;
+  line-height:1.55;
+  font-variant-numeric:tabular-nums;
+}
+.wrap{max-width:1000px;margin:0 auto;padding:0 28px}
+a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--signal);outline-offset:3px}
+
+/* masthead */
+.mast{padding:64px 0 28px;border-bottom:1px solid var(--ink)}
+h1{
+  font-size:clamp(32px,5.2vw,56px);
+  line-height:1.02;
+  font-weight:800;
+  letter-spacing:-.025em;
+  margin:0 0 18px;
+  max-width:20ch;
+}
+.standfirst{font-size:19px;line-height:1.5;max-width:var(--measure);margin:0 0 26px;color:var(--ink)}
+.byline{display:flex;flex-wrap:wrap;gap:6px 26px;font-size:14px;color:var(--muted);margin:0}
+.byline span{white-space:nowrap}
+
+/* sections */
+section{padding:52px 0;border-bottom:1px solid var(--rule)}
+h2{font-size:clamp(23px,3vw,30px);line-height:1.15;font-weight:700;letter-spacing:-.018em;margin:0 0 16px;max-width:26ch}
+h3{font-size:18px;font-weight:600;margin:34px 0 8px;letter-spacing:-.005em}
+p{max-width:var(--measure);margin:0 0 16px}
+.lede{font-size:19px}
+.note{font-size:14.5px;color:var(--muted);max-width:var(--measure)}
+
+/* the ladder */
+.ladder{margin:34px 0 8px}
+.ladder-head{
+  display:grid;grid-template-columns:112px repeat(3,1fr);gap:0 22px;
+  padding-bottom:9px;border-bottom:1px solid var(--ink);
+  font-size:14px;font-weight:600;
+}
+.ladder-head div:first-child{color:var(--muted);font-weight:400}
+.rung{
+  display:grid;grid-template-columns:112px repeat(3,1fr);gap:0 22px;
+  align-items:center;padding:16px 0;border-bottom:1px solid var(--rule);
+}
+.rung-label{font-size:15px;font-weight:600;line-height:1.25}
+.rung-label small{display:block;font-weight:400;font-size:13px;color:var(--muted);letter-spacing:0}
+.cell{display:grid;grid-template-columns:1fr 92px;align-items:center;gap:10px;min-width:0}
+.track{height:30px;min-width:0}
+.bar{position:relative;height:100%;background:var(--fill);min-width:3px}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--signal);opacity:.9}
+.lab{font-size:13px;white-space:nowrap}
+.lab b{font-weight:600}
+.lab em{font-style:normal;color:var(--muted)}
+.key{display:flex;flex-wrap:wrap;gap:18px;margin-top:18px;font-size:13.5px;color:var(--muted)}
+.key span{display:flex;align-items:center;gap:7px}
+.sw{width:15px;height:11px;display:inline-block}
+.sw.fill{background:var(--fill)}
+.sw.sig{background:var(--signal);opacity:.88}
+
+/* findings */
+.finding{border-left:3px solid var(--ink);padding:2px 0 2px 20px;margin:0 0 30px;max-width:var(--measure)}
+.finding.flag{border-left-color:var(--signal)}
+.finding h3{margin:0 0 7px}
+.finding p{margin:0 0 10px}
+.finding p:last-child{margin-bottom:0}
+.stat{font-weight:600}
+
+/* table */
+.scroll{overflow-x:auto;margin:26px 0 10px}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:15px}
+caption{text-align:left;font-size:14px;color:var(--muted);padding-bottom:10px}
+th,td{text-align:right;padding:10px 12px;border-bottom:1px solid var(--rule)}
+th:first-child,td:first-child{text-align:left;padding-left:0}
+thead th{border-bottom:1px solid var(--ink);font-weight:600;font-size:14px}
+tbody tr:last-child td{border-bottom:1px solid var(--ink);font-weight:600}
+td.hi{color:var(--signal);font-weight:600}
+.dag{color:var(--muted);font-weight:400;padding-left:2px}
+
+/* actions */
+ol.actions{list-style:none;counter-reset:a;padding:0;margin:26px 0 0;max-width:var(--measure)}
+ol.actions li{counter-increment:a;position:relative;padding-left:38px;margin-bottom:28px}
+ol.actions li::before{
+  content:counter(a);position:absolute;left:0;top:1px;
+  font-weight:800;font-size:15px;width:24px;height:24px;
+  display:grid;place-items:center;border:1.5px solid var(--ink);border-radius:50%;
+}
+ol.actions strong{display:block;font-size:17px;margin-bottom:5px}
+ol.actions p{margin:0 0 8px;font-size:16px}
+.measure{font-size:14.5px;color:var(--muted)}
+
+footer{padding:40px 0 72px;font-size:14px;color:var(--muted)}
+footer p{max-width:var(--measure)}
+
+@media (max-width:720px){
+  body{font-size:16px}
+  .wrap{padding:0 20px}
+  .ladder-head,.rung{grid-template-columns:1fr;gap:8px}
+  .cell{grid-template-columns:1fr 138px}
+  .lab{font-size:12.5px}
+  .ladder-head div:not(:first-child){display:none}
+  .ladder-head div:first-child{font-size:13px}
+  .lab b::after{content:' in ' attr(data-mkt)}
+  .rung{padding:18px 0}
+}
+@media (prefers-reduced-motion:no-preference){
+  .bar i{transition:width .5s ease}
+}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <h1 id="title">One knitwear plan, three markets that did not agree with it</h1>
+    <p class="standfirst" id="standfirst"></p>
+    <p class="byline">
+      <span id="by"></span>
+      <span id="when"></span>
+      <span>Public product data, manually collected</span>
+    </p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>The price ladder</h2>
+    <p class="lede" id="ladderLede"></p>
+
+    <div class="ladder" id="ladder"></div>
+
+    <div class="key">
+      <span><i class="sw fill"></i> Options at full price</span>
+      <span><i class="sw sig"></i> Options currently discounted</span>
+      <span>Tiers set in euro so the three markets sit on one axis</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>What the shape says</h2>
+    <div id="findings"></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Conviction against outcome</h2>
+    <p>Colourways per style is the closest public read on how much conviction the plan put behind a style: a style bought in four colours was expected to sell harder than one bought in two. Discount rate is the closest read on whether that landed. Where the two disagree, there is a planning question worth asking.</p>
+
+    <div class="scroll">
+      <table id="matrix">
+        <caption id="matrixCap"></caption>
+      </table>
+    </div>
+    <p class="note">Conviction index is colourways per style indexed to the average across all tiers and markets; above 100 means the plan committed more depth than average. Percentages marked &dagger; come from fewer than 20 options and move too much to build a decision on, so they are left unflagged.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>What I would do about it</h2>
+    <p>Three actions, each tied to a number above and each with the thing I would watch to know whether it worked.</p>
+    <ol class="actions" id="actions"></ol>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Method, and what this cannot tell you</h2>
+    <p id="method"></p>
+    <p>Every number here comes from public product listings collected by hand on one day. That gives an honest read on what is offered and what is currently reduced. It cannot tell you units sold, margin, stock cover, or intake plan, so nothing here is a claim about H&amp;M's actual performance.</p>
+    <p>Two proxies do the analytical work. Colourways per style stands in for planned conviction. Share of options currently discounted stands in for where that conviction did not convert. Both are directional. With real selling data — sell-through by week, stock cover, contribution after markdown — the same framework would produce a firmer answer, and the recommendations would be sized rather than directional.</p>
+    <p>A one-day snapshot also catches each market at a different point in its markdown cycle. Repeating the collection weekly across a season would separate structural differences from timing differences, which is the version of this I would run inside the business.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p id="foot"></p>
+  </div>
+</footer>
+
+<script src="data.js"></script>
+<script>
+(function(){
+  const fmt = n => n.toLocaleString('en-GB', {maximumFractionDigits:0});
+  const the = n => /^(United|Netherlands|Philippines|Czech)/.test(n) ? 'the ' + n : n;
+  const list = a => a.length < 2 ? (a[0]||'') : a.slice(0,-1).join(', ') + ' and ' + a[a.length-1];
+  const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+  const pc  = n => n.toFixed(0) + '%';
+  const pc1 = n => n.toFixed(1) + '%';
+
+  const M = CASE.markets, T = CASE.tiers;
+  const get = (m,t) => m.tiers[t.key];
+
+  // ---- derived figures -----------------------------------------------------
+  M.forEach(m => {
+    m.total = T.reduce((s,t)=>s+get(m,t).options,0);
+    m.totalDisc = T.reduce((s,t)=>s+get(m,t).discounted,0);
+    m.discRate = m.totalDisc / m.total * 100;
+  });
+  const maxOptions = Math.max(...M.flatMap(m=>T.map(t=>get(m,t).options)));
+  const grandCol = M.flatMap(m=>T.map(t=>get(m,t).colourways));
+  const avgCol = grandCol.reduce((a,b)=>a+b,0)/grandCol.length;
+
+  const tierRate = t => {
+    const o = M.reduce((s,m)=>s+get(m,t).options,0);
+    const d = M.reduce((s,m)=>s+get(m,t).discounted,0);
+    return {options:o, disc:d, rate:d/o*100};
+  };
+
+  // Over-planning cell: highest discount rate among cells the plan backed with
+  // above-average colour depth. Cells with fewer than 20 options are excluded —
+  // a discount rate off 9 options is noise, not a finding.
+  const MIN_N = 20;
+  let worst = null, worstAny = null;
+  M.forEach(m=>T.forEach(t=>{
+    const c = get(m,t), r = c.discounted/c.options*100, conv = c.colourways/avgCol*100;
+    if(!worstAny || r > worstAny.rate) worstAny = {m,t,rate:r,cell:c,conv};
+    if(c.options < MIN_N) return;
+    if(!worst || r > worst.rate) worst = {m,t,rate:r,cell:c,conv};
+  }));
+  worst = worst || worstAny;
+  const worstBacked = worst.conv >= 100;
+  // tier where markets disagree most on share of assortment
+  let split = null;
+  T.forEach(t=>{
+    const shares = M.map(m=>get(m,t).options/m.total*100);
+    const spread = Math.max(...shares) - Math.min(...shares);
+    if(!split || spread > split.spread) split = {t, spread, shares};
+  });
+  const splitHigh = M[split.shares.indexOf(Math.max(...split.shares))];
+  const splitLow  = M[split.shares.indexOf(Math.min(...split.shares))];
+  // healthiest cell: high conviction, low discount
+  let best = null;
+  M.forEach(m=>T.forEach(t=>{
+    const c=get(m,t), r=c.discounted/c.options*100, conv=c.colourways/avgCol*100;
+    const score = conv - r*2;
+    if(!best || score > best.score) best={m,t,cell:c,rate:r,conv,score};
+  }));
+
+  // ---- masthead ------------------------------------------------------------
+  const sorted = [...M].sort((a,b)=>b.discRate-a.discRate);
+  document.getElementById('standfirst').textContent =
+    'A read on ' + CASE.meta.category.toLowerCase() + ' across ' +
+    list(M.map(m=>the(m.name))) +
+    ', built from public product listings. Same brand, same season, three price ladders that pull in different directions — and one tier carrying ' +
+    pc(worst.rate) + ' of its options on markdown.';
+  document.getElementById('by').textContent = CASE.meta.author;
+  const d = new Date(CASE.meta.collected + 'T00:00:00');
+  const when = d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('when').textContent = 'Collected ' + when;
+  document.getElementById('foot').textContent =
+    CASE.meta.category + ', covering ' + CASE.meta.subcategory.toLowerCase() + '. Prepared by ' +
+    CASE.meta.author + ' as an independent case study, not affiliated with or endorsed by any retailer. ' +
+    'Currency conversion uses ' + CASE.meta.rateSource + ' on the collection date.';
+
+  const top = sorted.filter(m => sorted[0].discRate - m.discRate < 0.5);
+  const low = sorted[sorted.length-1];
+  document.getElementById('ladderLede').textContent =
+    'Each row is a price tier. The bar is how many options that market offers there; the red portion is how many are already reduced. ' +
+    (top.length > 1
+      ? cap(list(top.map(m=>the(m.name)))) + ' carry the same markdown load overall, ' + pc1(top[0].discRate) +
+        ' of options each, against ' + pc1(low.discRate) + ' in ' + the(low.name) + '.'
+      : cap(the(top[0].name)) + ' carries the heaviest markdown load overall at ' + pc1(top[0].discRate) +
+        ' of options, against ' + pc1(low.discRate) + ' in ' + the(low.name) + '.');
+
+  // ---- ladder --------------------------------------------------------------
+  const lad = document.getElementById('ladder');
+  const head = document.createElement('div');
+  head.className = 'ladder-head';
+  head.innerHTML = '<div>Price tier</div>' + M.map(m=>'<div>'+m.name+'</div>').join('');
+  lad.appendChild(head);
+
+  [...T].reverse().forEach(t=>{
+    const row = document.createElement('div');
+    row.className = 'rung';
+    const range = t.ceilingEUR === null
+      ? '€' + t.floorEUR + ' and above'
+      : '€' + t.floorEUR + '–' + t.ceilingEUR;
+    let html = '<div class="rung-label">'+t.label+'<small>'+range+'</small></div>';
+    M.forEach(m=>{
+      const c = get(m,t);
+      const w = c.options / maxOptions * 100;
+      const dw = c.discounted / maxOptions * 100;
+      html += '<div class="cell">'
+            +   '<div class="track"><div class="bar" style="width:'+w.toFixed(1)+'%">'
+            +     '<i style="width:'+(w?(dw/w*100).toFixed(1):0)+'%"></i>'
+            +   '</div></div>'
+            +   '<div class="lab"><b data-mkt="'+m.name+'">'+c.options+'</b> <em>'+c.discounted+' cut</em></div>'
+            + '</div>';
+    });
+    row.innerHTML = html;
+    lad.appendChild(row);
+  });
+
+  // ---- findings ------------------------------------------------------------
+  const f = document.getElementById('findings');
+  const card = (flag,h,body) => {
+    const el = document.createElement('div');
+    el.className = 'finding' + (flag?' flag':'');
+    el.innerHTML = '<h3>'+h+'</h3>'+body;
+    f.appendChild(el);
+  };
+
+  card(true,
+    worstBacked
+      ? worst.m.name + ' backed ' + worst.t.label.toLowerCase() + ' hardest and is discounting it fastest'
+      : worst.m.name + ' is discounting ' + worst.t.label.toLowerCase() + ' fastest',
+    '<p><span class="stat">' + worst.cell.discounted + ' of ' + worst.cell.options +
+    ' options (' + pc(worst.rate) + ')</span> in the ' + worst.t.label.toLowerCase() +
+    ' tier are already reduced' +
+    (worstBacked
+      ? ', and the plan went in at ' + worst.cell.colourways.toFixed(1) +
+        ' colourways per style against a ' + avgCol.toFixed(1) +
+        ' average. Depth was committed to a tier that is not holding price.'
+      : ', on ' + worst.cell.colourways.toFixed(1) + ' colourways per style against a ' +
+        avgCol.toFixed(1) + ' average. The plan was already cautious here and the tier still did not hold.') +
+    '</p>' +
+    '<p>The cost is not only the markdown. Those options occupy space and buy that a tier holding full price could have used.</p>');
+
+  card(false,
+    'The ' + split.t.label.toLowerCase() + ' tier is where the markets diverge most',
+    '<p>' + splitHigh.name + ' gives ' + split.t.label.toLowerCase() + ' <span class="stat">' +
+    pc(Math.max(...split.shares)) + '</span> of its knitwear options; ' + splitLow.name + ' gives it <span class="stat">' +
+    pc(Math.min(...split.shares)) + '</span>. A ' + split.spread.toFixed(0) +
+    ' point gap in the same season is either a deliberate customer difference or a drift nobody re-checked.</p>' +
+    '<p>It is worth knowing which. If it is deliberate, the reasoning should be written down. If it is drift, one of the two is wrong.</p>');
+
+  card(false,
+    best.m.name + ' shows what the shape looks like when it works',
+    '<p>' + best.t.label + ' in ' + best.m.name + ' runs ' + best.cell.colourways.toFixed(1) +
+    ' colourways per style at a <span class="stat">' + pc(best.rate) +
+    '</span> discount rate — conviction indexed at ' + best.conv.toFixed(0) +
+    ' and still holding price. That combination is the benchmark the other cells should be judged against.</p>');
+
+  // ---- matrix --------------------------------------------------------------
+  const tb = document.getElementById('matrix');
+  document.getElementById('matrixCap').textContent =
+    'Options, conviction and discount rate by tier and market. ' + CASE.meta.category + ', collected ' + when + '.';
+  let h = '<thead><tr><th>Tier</th>';
+  M.forEach(m=>{ h += '<th>'+m.code+' options</th><th>'+m.code+' conviction</th><th>'+m.code+' discounted</th>'; });
+  h += '</tr></thead><tbody>';
+  T.forEach(t=>{
+    h += '<tr><td>'+t.label+'</td>';
+    M.forEach(m=>{
+      const c = get(m,t);
+      const conv = c.colourways/avgCol*100;
+      const r = c.discounted/c.options*100;
+      const thin = c.options < MIN_N;
+      h += '<td>'+c.options+(thin?'<span class="dag">\u2020</span>':'')+'</td>';
+      h += '<td>'+conv.toFixed(0)+'</td>';
+      h += '<td class="'+(r>=25 && !thin ?'hi':'')+'">'+pc(r)+'</td>';
+    });
+    h += '</tr>';
+  });
+  h += '<tr><td>All tiers</td>';
+  M.forEach(m=>{
+    const wCol = T.reduce((s2,t)=>s2+get(m,t).colourways*get(m,t).options,0)/m.total;
+    h += '<td>'+m.total+'</td><td>'+(wCol/avgCol*100).toFixed(0)+'</td><td>'+pc(m.discRate)+'</td>';
+  });
+  h += '</tr></tbody>';
+  tb.innerHTML = h;
+
+  // ---- actions -------------------------------------------------------------
+  const entry = T[0], premium = T[T.length-1];
+  const acts = [
+    {
+      t: 'Stop the bleed in ' + worst.m.name + ' ' + worst.t.label.toLowerCase() + ' before the next buy',
+      p: 'At ' + pc(worst.rate) + ' discounted, this tier is funding its own volume. Hold the intake flat for the next drop rather than growing it, and move the colour depth into the tier that is holding price.',
+      m: 'Watch: discount rate in this cell four weeks after the next drop lands. Target is the ' + best.m.name + ' ' + best.t.label.toLowerCase() + ' rate of ' + pc(best.rate) + '.'
+    },
+    {
+      t: 'Settle the ' + split.t.label.toLowerCase() + ' gap between ' + splitHigh.name + ' and ' + splitLow.name,
+      p: 'A ' + split.spread.toFixed(0) + ' point difference in tier share needs an owner and a reason. Ask the two regions to state theirs. If neither can, move the smaller one toward the better-performing shape and treat the difference as drift, not strategy.',
+      m: 'Watch: tier share and full-price sell-through in both markets over the following two months, reviewed side by side rather than separately.'
+    },
+    {
+      t: 'Rebalance stock between regions instead of marking it down twice',
+      p: 'Where one market is discounting a tier that another is holding at full price, the first move is a transfer, not a price cut. Identify the overlapping styles, check size availability on both sides, and move before the second markdown.',
+      m: 'Watch: units moved versus units marked down in the same period, and whether the receiving market held full price on them.'
+    }
+  ];
+  document.getElementById('actions').innerHTML = acts.map(a =>
+    '<li><strong>'+a.t+'</strong><p>'+a.p+'</p><p class="measure">'+a.m+'</p></li>').join('');
+
+  document.getElementById('method').textContent =
+    'Options in ' + CASE.meta.subcategory.toLowerCase() + ' were counted by hand on ' + when +
+    ' from public listings in ' + list(M.map(m=>the(m.name))) +
+    '. Local prices were converted to euro at ' + CASE.meta.rateSource +
+    ' on that date so that tiers are comparable, giving ' +
+    M.reduce((s,m)=>s+m.total,0) + ' options in total.';
+})();
+</script>
+</body>
+</html>
