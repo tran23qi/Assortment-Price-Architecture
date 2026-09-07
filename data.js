@@ -1,20 +1,3 @@
-/* ============================================================================
-   DATA — replace every number here with your own observations before publishing.
-   Everything on the page is calculated from this file. Nothing is hardcoded.
-
-   HOW TO COLLECT (about 90 minutes):
-   1. Open hm.com in three markets: /en_se, /de_de, /en_us
-   2. Go to the same category page in each. Set the same filters.
-   3. For each market record: total options shown, then for each price tier
-      the option count, the average number of colourways per style, and how
-      many options are currently discounted.
-   4. Colourways per style is your proxy for how much conviction the plan
-      put behind a style. Discounted share is your proxy for where that
-      conviction did not pay off. Say so on the page — it is stated in the
-      Method section already.
-   5. Put the collection date in meta.collected. Do not leave it stale.
-   ========================================================================== */
-
 const CASE = {
   meta: {
     category: "Women's knitwear",
