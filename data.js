@@ -5,7 +5,6 @@ const CASE = {
     collected: '2026-09-07',
     author: 'Anna Tran',
     // Rates used to put every market on one comparable axis.
-    // Update these to the rate on your collection date and say where you got it.
     rateSource: 'ECB reference rates',
   },
 
